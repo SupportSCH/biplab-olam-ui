@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Menu Details</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	
+	<link rel="stylesheet" href="bootstrap/css/bootstrap.css" />
+	<link rel="stylesheet" href="css/style2.css">
+	<link rel="stylesheet" href="bootstrap/css/w3.css">
+
+</head>
+<body class="form-v4">
+
+	<div class="page-content">
+		<div class="form-v4-content">
+			<form class="form-detail" action="#" method="post" id="myform" autocomplete="off">
+                <h2>Menus</h2>
+                
+				<div class="form-group">
+				
+						<div class="form-row form-row-1 " style='display:none'>
+								<label for="menu_code">Menu Code</label>
+								<input type="text" style="font-size:13px" name="menu_code" id="menu_code" class="input-text">
+						</div>
+						<div class="form-row form-row-1 ">
+								<label for="menu_name">Menu Name</label>
+								<input type="text" style="font-size:13px" name="menu_name" id="menu_name" class="input-text">
+						</div>
+						
+						<div class="form-row form-row-1 ">
+								<label for="domain">Domain</label>
+								<input type="text" style="font-size:13px" name="domain" id="domain" class="input-text">
+						</div>
+				</div>
+				
+				<div class="form-group">
+						
+						<div class="form-row form-row-1 ">
+								<label for="routerLink">RouterLink</label>
+								<input type="text" style="font-size:13px" name="routerLink" id="routerLink" class="input-text">
+						</div>
+						
+						<div class="form-row form-row-1 ">
+								<label for="ServerLevel">Server Level</label>
+								<input type="text" style="font-size:13px" name="server_level" id="server_level" class="input-text">
+						</div>
+				</div>
+
+
+				
+                
+				<div class="form-row-last">
+					<!--<input type="submit" name="register" class="register" value="Submit">
+					<input type="submit" name="register" class="cancel" value="Cancel">-->
+					<button type='submit' name="register" class="register buttonBTN" value="Register">Save</button>
+					<button type='submit' name="cancel" class="cancel buttonBTN" value="cancel" style="margin:3px">Cancel</button>
+				</div>
+				<br>
+				<div class="form-left">
+						<h2>Menus View</h2>
+						<table class="w3-table-all w3-card-4" method="get">
+							<thead>
+								<tr class="w3-hover-text-green">
+									<tr>
+									  <!--<th>Menu_Code</th>-->
+									  <th>Menu_Name</th>
+									  <th>Domain</th>
+									  <th>RouterLink</th>
+									  <th>ServerLevel</th>
+									  <th style="color:#CD5C5C">Action</th>
+									</tr>	
+								</tr>
+							</thead>
+							<tbody id="menusData">
+							</tbody>
+						</table>
+					</div>
+			</form>
+		</div>
+	</div>
+	
+	<main role="main" class="container starter-template">
+
+    <div class="row">
+        <div class="col">
+
+
+            <div id="response"></div>
+
+            <div id="content"></div>
+        </div>
+    </div>
+
+</main>
+	
+<script src="bootstrap/js/jquery.min.js"></script>
+<script src="bootstrap/js/bootstrap.js"></script>
+
+<script>
+
+	function loadTable() {
+	
+		$.ajax({
+				url:"controller/olam_getMenus.php",
+				type:"POST",						//its actually a Get method but here we are updating the data so data will be created new , so I put it as a POST method.
+				contentType:'application/json',
+				success: function(data){
+								console.log("menusData", data);
+								var task = JSON.parse(JSON.stringify(data));
+								console.log("task", task.data.tasks);
+								var tasks = task.data.tasks;
+								$('#menusData').find("tr").remove();
+								for(i=0;i<tasks.length;i++){
+												var rowData = tasks[i];
+												var menucodeid = "menu_code"+i;
+												var menunameid = "menu_name"+i;
+												var domainid = "domain"+i;
+												var routerLinkid = "routerLink"+i;
+												var serverlevelid = "server_level"+i;
+												$('#menusData').append("<tr id="+i+"> <td id="+menucodeid+" style='display:none'>"+rowData.menu_code+"</td> <td id="+menunameid+">"+rowData.menu_name+"</td> <td id="+domainid+">"+rowData.domain+"</td> <td id="+routerLinkid+">"+rowData.routerLink+"</td> <td id="+serverlevelid+">"+rowData.server_level+"</td> <td><button type='button' name='edit' class='btn btn-warning btn-sm edit'>Edit</button></td> </tr>");
+								}
+				}
+				, error: function(xhr, resp, text){
+
+						$('#response').html();
+						
+				}
+		});
+	}
+
+	$(document).ready(function(){
+					
+					loadTable();	
+			
+	$(document).on('submit', '#myform', function(){
+	
+		var myform=$(this);
+		var form_data=JSON.stringify(myform.serializeObject());
+		var jform_data=JSON.parse(form_data);
+		
+		console.log("formdata:"+jform_data);
+		
+		var updateUrl = "http://localhost/Menus/controller/olam_updateMenus.php?menucode="+jform_data.menu_code;
+		var createUrl = "http://localhost/Menus/controller/olam_createMenus.php";
+		
+		var buttontext = $('.register.buttonBTN').text();
+
+	if(buttontext === "Update") {		// This is for update ajax call
+		
+		$.ajax({
+			url: updateUrl,
+			type:"PATCH",
+			contentType:'application/json',
+			data:JSON.stringify(jform_data),
+			success:function(data){
+					
+					$('#response').html();
+					myform.find('input').val('');
+					$('.register.buttonBTN').text("Save");
+					loadTable();
+					
+
+			}
+			, error: function(xhr, resp, text){
+
+					$('#response').html();
+					myform.find('input').val('');
+			}
+		});
+	}
+	
+	if(buttontext === "Save") {       //This is for create ajax call
+	
+		$.ajax({
+			url: createUrl,
+			type:"POST",
+			contentType:'application/json',
+			data:JSON.stringify(jform_data),
+			success:function(data){
+					
+					$('#response').html();
+					myform.find('input').val('');
+					loadTable();
+					
+
+			}
+			, error: function(xhr, resp, text){
+
+					$('#response').html();
+					myform.find('input').val('');
+			}
+		});
+	
+	}
+	
+		return false;
+	});
+	
+	
+	$(document).on('click', '.edit', function(){
+	
+				console.log($(this).closest('tr').attr('id'));
+				
+				var id = $(this).closest('tr').attr('id');
+				
+				$('.register.buttonBTN').text("Update");
+				
+				$('#menu_code').val($('#menu_code'+id).text());
+				$('#menu_name').val($('#menu_name'+id).text());
+				$('#domain').val($('#domain'+id).text());
+				$('#routerLink').val($('#routerLink'+id).text());
+				$('#server_level').val($('#server_level'+id).text());
+
+			});
+			
+	
+	
+	$.fn.serializeObject = function(){
+
+		var o = {};
+		var a = this.serializeArray();
+		$.each(a, function() {
+			if (o[this.name] !== undefined) {
+				if (!o[this.name].push) {
+					o[this.name] = [o[this.name]];
+				}
+				o[this.name].push(this.value || '');
+			} else {
+				o[this.name] = this.value || '';
+			}
+		});
+		return o;
+	};
+			
+
+});
+
+</script>
+</body>
+</html>

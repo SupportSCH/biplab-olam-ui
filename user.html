@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>User Details</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+	<link rel="stylesheet" href="bootstrap/css/bootstrap.css" />
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="bootstrap/css/w3.css">
+	<link rel="stylesheet" href="bootstrap/css/select2.css">
+	
+
+</head>
+<body class="form-v4">
+
+	<div class="page-content" id="apicrudModal">
+		<div class="form-v4-content">
+			<form class="form-detail" method="post" id='myform' autocomplete="off">
+				<h2>Users</h2>
+
+				<div class="form-group">
+				
+					<div class="form-row form-row-1 " style="display:none">
+						<label for="user_id">User ID</label>
+						<input type="text" style="font-size:13px" name="user_id" id="user_id" class="input-text">
+					</div>
+				
+					<div class="form-row form-row-1 ">
+						<label for="comp_code">Company Code</label>
+						<input type="text" style="font-size:13px" name="comp_code" id="comp_code" class="input-text">
+					</div>
+					<div class="form-row form-row-1">
+						<label for="plant_code">Plant Code</label>
+						<input type="text"  style="font-size:13px" name="plant_code" id="plant_code" class="input-text">
+					</div>
+					<div class="form-row form-row-1 ">
+							<label for="username">User Name</label>
+							<input type="text"  style="font-size:13px" name="user_name" id="user_name" class="input-text">
+					</div>
+					
+				</div>
+
+				<div class="form-group">
+
+					<div class="form-row form-row-1">
+						<label for="email">EmailID</label>
+						<input type="text" style="font-size:13px" name="login_id" id="login_id" class="input-text">
+					</div>
+					
+					<div class="form-row form-row-1">
+						<label for="department">Department</label>
+						<input type="text" style="font-size:13px" name="department" id="department" class="input-text deptSize">
+					</div>
+					
+					<div class="form-row form-row-1" >
+						<label for="rolecode">Role Code</label>
+						<input type="text" style="font-size:13px" name="role_code" id="role_code" class="input-text">
+					</div>
+						
+				</div>
+
+
+				<div class="form-group">
+					<div class="form-row form-role-1">
+						
+						<!--<label for="rolename">Role Name</label>
+						<input type="text" style="font-size:13px; " name="role_name" id="role_name" class="input-text">-->
+					
+					
+					<label for="role_name">Role Name</label>
+								
+								<select class="form-control" style="font-size:11px" name="role_name" id="role_name" class="input-text" multiple="multiple">
+										  <option id="roles_name">
+										  </option>		  
+								</select>
+								
+					</div>
+					<div class="form-row form-role-2"  style="margin-left:6px;padding-bottom:2px">
+							<button type="button" style="font-size:13px"  class="btn btn-info btn-sm" onClick="location.href='../Roles/role.html'">Add Role</button>
+					</div>
+				</div>
+
+				<br>
+				<div class="form-row-last">
+					<!--<input type="submit" name="register" class="register" value="Register">-->
+					<button type='submit' name="register" class="register buttonBTN" value="Register" style="margin:3px">Save</button>
+					<!--<input type="submit" name="register" class="cancel" value="Cancel">-->
+					<button type='submit' name="cancel" class="cancel buttonBTN" value="Cancel">Cancel</button>
+				</div>
+
+				<br>
+				<div class="form-left">
+						<h2>Users View</h2>
+						<table class="w3-table-all w3-card-4"  method="get">
+								<thead>
+									<tr class="w3-hover-text-green">
+											<tr>
+											  <th>Comp_Code</th>
+											  <th>Plant_Code</th>
+											  <th>User_Name</th>
+											  <th>Email_ID</th>
+											  <th>Department</th>
+											  <!--th>Role_Code</th>-->
+											  <th>Role_Name</th>
+											  <th style="color:#CD5C5C">Action</th>
+											</tr>
+									</tr>
+								</thead>
+								<tbody id="tableData">
+								</tbody>
+						</table>
+					</div>
+			</form>
+		</div>
+	</div>
+<main role="main" class="container starter-template">
+
+    <div class="row">
+        <div class="col">
+
+
+            <div id="response"></div>
+
+            <div id="content"></div>
+        </div>
+    </div>
+
+</main>
+
+
+<script src="bootstrap/js/jquery.min.js"></script>
+<script src="bootstrap/js/bootstrap.js"></script>
+<script src="bootstrap/js/select2.js"></script>
+
+<script>
+
+	function loadTable() {
+	
+		$.ajax({
+				url:"../Roles/controller/olam_getRole.php",
+				type:"POST",								//Its actually get the data from Role table but In Roles table, I put it POST in above url that's why here is post method
+				contentType:'application/json',
+				success: function(data){
+								var task = JSON.parse(JSON.stringify(data));
+								var tasks = task.data.tasks;
+								for(i=0;i<tasks.length;i++){
+												var rowData = tasks[i];
+												$('#role_name').append("<option>"+rowData.role_name+"</option>");
+								}
+				}
+				, error: function(xhr, resp, text){
+
+						$('#response').html();
+						
+				}
+		});
+	
+	
+
+		$.ajax({
+				url:"controller/olam_getUser.php",
+				type:"POST",						//its actually a Get method but here we are updating the data so data will be created new , so I put it as a POST method in the above URL.
+				contentType:'application/json',
+				success: function(data){
+								console.log("tableData", data);
+								var task = JSON.parse(JSON.stringify(data));
+								console.log("task", task.data.tasks);
+								var tasks = task.data.tasks;
+								$('#tableData').find("tr").remove();
+								for(i=0;i<tasks.length;i++){
+												var rowData = tasks[i];
+												var userid = "user_id"+i;
+												var compcodeid = "comp_code"+i;
+												var plantcodeid = "plant_code"+i;
+												var usernameid = "user_name"+i;
+												var emailid = "login_id"+i;
+												var departmentid = "department"+i;
+												var rolecodeid = "role_code"+i;
+												var rolenameid = "role_name"+i;
+												$('#tableData').append("<tr id="+i+"> <td id="+userid+" style='display:none'>"+rowData.user_id+"</td> <td id="+compcodeid+">"+rowData.comp_code+"</td> <td id="+plantcodeid+">"+rowData.plant_code+"</td> <td id="+usernameid+">"+rowData.user_name+"</td> <td id="+emailid+">"+rowData.login_id+"</td> <td id="+departmentid+">"+rowData.department+"</td> <td id="+rolecodeid+" style='display:none'>"+rowData.role_code+"</td> <td id="+rolenameid+">"+rowData.role_name+"</td> <td><button type='button' name='edit' class='btn btn-warning btn-sm edit'>Edit</button></td> </tr>");
+								}
+				}
+				, error: function(xhr, resp, text){
+
+						$('#response').html();
+
+				}
+		});
+	}
+
+$(document).ready(function(){
+
+					loadTable();
+					
+			$(document).on('click', '.edit', function(){
+	
+				console.log($(this).closest('tr').attr('id'));
+				
+				var id = $(this).closest('tr').attr('id');
+				
+				$('.register.buttonBTN').text("Update");  //save button will automatically change to Update when we click on edit
+				
+				$('#user_id').val($('#user_id'+id).text());
+				$('#comp_code').val($('#comp_code'+id).text());
+				$('#plant_code').val($('#plant_code'+id).text());
+				$('#user_name').val($('#user_name'+id).text());
+				$('#login_id').val($('#login_id'+id).text());
+				$('#department').val($('#department'+id).text());
+				$('#role_code').val($('#role_code'+id).text());
+				$('#role_name').val($('#role_name'+id).text());
+
+
+			});
+			
+	$(document).on('submit', '#myform', function(){ 
+
+		var myform=$(this);
+		var form_data=JSON.stringify(myform.serializeObject());
+		var jform_data=JSON.parse(form_data);
+		delete jform_data.role_name;
+		console.log("formdata:"+jform_data);
+				
+		var updateUrl = "http://localhost/User/controller/olam_updateUser.php?userid="+jform_data.user_id;
+		var createUrl = "http://localhost/User/controller/olam_createUser.php";
+		
+		var buttontext = $('.register.buttonBTN').text();
+		
+	if(buttontext === "Update") {
+	
+		$.ajax({
+			url: updateUrl,
+			type:"PATCH",
+			contentType:'application/json',
+			data:JSON.stringify(jform_data),
+			success:function(data){
+
+					$('#response').html();
+					myform.find('input').val('');
+					$('.register.buttonBTN').text("Save");
+					loadTable();
+				   
+			}
+			, error: function(xhr, resp, text){
+
+					$('#response').html();
+					myform.find('input').val('');
+			}
+		});
+	}
+	
+	if(buttontext === "Save") {
+	
+		$.ajax({
+			url: createUrl,
+			type:"POST",
+			contentType:'application/json',
+			data:JSON.stringify(jform_data),
+			success:function(data){
+
+					$('#response').html();
+					myform.find('input').val('');
+					loadTable();
+				   
+			}
+			, error: function(xhr, resp, text){
+
+					$('#response').html();
+					myform.find('input').val('');
+			}
+		});
+	}
+
+		return false;
+	});
+ 
+	
+	$.fn.serializeObject = function(){
+
+    var o = {};
+    var a = this.serializeArray();
+    $.each(a, function() {
+        if (o[this.name] !== undefined) {
+            if (!o[this.name].push) {
+                o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || '');
+        } else {
+            o[this.name] = this.value || '';
+        }
+    });
+    return o;
+};
+
+
+$("#role_name").select2({
+			
+		}); 
+			
+			
+
+
+});
+	
+/*if(buttontext === "Save") {
+		$.ajax({
+			url: createUrl,
+			type:"POST",
+			contentType:'application/json',
+			data:JSON.stringify(jform_data),
+			success:function(data){
+					
+					$('#response').html();
+					myform.find('input').val('');
+					loadTable();
+					
+
+			}
+			, error: function(xhr, resp, text){
+
+					$('#response').html();
+					myform.find('input').val('');
+			}
+		});
+		
+	}*/
+	
+	
+
+</script>
+</body>
+</html>
